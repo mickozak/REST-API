@@ -19,4 +19,4 @@ exports.createPost = (req,res,next) => {
             content: content
         }
     });
-}
+};
