@@ -68,5 +68,3 @@ mongoose.connect('mongodb+srv://kozak:53352190@cluster0-ypi1l.mongodb.net/shop')
 }).catch(err=>{
     console.log(err)
 })
-
-
