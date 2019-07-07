@@ -7,19 +7,16 @@ const Post = require('../models/post')
 const User = require('../models/user')
 
 
-exports.getPosts = (req, res, next) => {
+exports.getPosts = async (req, res, next) => {
     const currentPage = req.query.page || 1;
     const perPage = 2;
     let totalItems;
-    Post.find()
-      .countDocuments()
-      .then(count => {
-        totalItems = count;
-        return Post.find()
+    try {
+    const totalItems = await Post.find().countDocuments()
+    const posts = await Post.find()
+          .populate('creator')
           .skip((currentPage - 1) * perPage)
           .limit(perPage);
-      })
-      .then(posts => {
         res
           .status(200)
           .json({
@@ -27,13 +24,12 @@ exports.getPosts = (req, res, next) => {
             posts: posts,
             totalItems: totalItems
           });
-      })
-      .catch(err => {
+      } catch (err) {
         if (!err.statusCode) {
-          err.statusCode = 500;
-        }
-        next(err);
-      });
+              err.statusCode = 500;
+            }
+            next(err);
+      }
   };
 
   exports.createPost = (req, res, next) => {
