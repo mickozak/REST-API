@@ -30,6 +30,8 @@ module.exports = {
         }
         if(errors.length>0){
             const error = new Error('Invalid input.');
+            error.data = errors;
+            error.code = 422;
             throw error;
         }
         const hashedPw = await bcrypt.hash(userInput.password, 12)
