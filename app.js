@@ -1,29 +1,16 @@
 const path = require('path');
 
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const uuidv4 = require('uuid/v4')
 const multer = require('multer');
+const graphqlHttp = require('express-graphql');
 
-
-const feedRoutes = require('./routes/feed')
-const authRoutes = require('./routes/auth')
-
+const graphqlSchema = require('./graphql/schema');
+const graphqlResolver = require('./graphql/resolver');
 
 const app = express();
-
-//app.use(bodyParser.urlencoded());
-
-// const fileStorage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, 'images')
-//     },
-//     filename: (req,file,cb) => {
-//         cb(null, new Date().toISOString() + '-' + file.originalname)
-//     }
-// })
 
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {
@@ -50,6 +37,8 @@ app.use(bodyParser.json());
 app.use(multer({storage: storage, fileFilter: fileFilter}).single('image'))
 app.use('/images',express.static(path.join(__dirname, 'images')));
 
+
+
 app.use((req,res,next)=>{
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, PATCH, DELETE');
@@ -57,8 +46,10 @@ app.use((req,res,next)=>{
     next();
 });
 
-app.use('/feed', feedRoutes)
-app.use('/auth', authRoutes)
+app.post('/graphql', graphqlHttp({
+    schema: graphqlHttp,
+    rootValue: graphqlResolver
+}))
 
 app.use((error, req, res, next)=>{
     const status = error.statusCode || 500;
@@ -69,11 +60,7 @@ app.use((error, req, res, next)=>{
 
 mongoose.connect('mongodb+srv://kozak:53352190@cluster0-ypi1l.mongodb.net/shop')
 .then(result=>{
-    const server = app.listen(8080);
-    const io = require('./socket').init(server);
-    io.on('connection', socket => {
-        console.log('Client connected')
-    })
+   app.listen(8080);
 }).catch(err=>{
     console.log(err)
 })
