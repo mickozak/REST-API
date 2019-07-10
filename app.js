@@ -48,7 +48,8 @@ app.use((req,res,next)=>{
 
 app.post('/graphql', graphqlHttp({
     schema: graphqlHttp,
-    rootValue: graphqlResolver
+    rootValue: graphqlResolver,
+    graphiql: true
 }))
 
 app.use((error, req, res, next)=>{
